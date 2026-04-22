@@ -1,0 +1,6 @@
+@FlouBackend_HostAddress = http://localhost:5258
+
+GET {{FlouBackend_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

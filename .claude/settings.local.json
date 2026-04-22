@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dotnet new *)",
+      "Bash(dotnet sln *)",
+      "Bash(dotnet add *)",
+      "Bash(rm FlouBackend.Data/Class1.cs FlouBackend.Business/Class1.cs)",
+      "Bash(mkdir -p FlouBackend.Data/Entities FlouBackend.Data/Context FlouBackend.Data/Configurations FlouBackend.Data/Migrations FlouBackend.Business/Interfaces/Repositories FlouBackend.Business/Interfaces/Services FlouBackend.Business/Repositories FlouBackend.Business/Services FlouBackend.Business/Mappings FlouBackend/DTOs/Requests FlouBackend/DTOs/Responses)",
+      "Bash(dotnet build *)",
+      "Bash(mkdir -p FlouBackend.Business/DTOs/Requests FlouBackend.Business/DTOs/Responses)",
+      "Bash(rmdir FlouBackend/DTOs/Requests FlouBackend/DTOs/Responses FlouBackend/DTOs)"
+    ]
+  }
+}

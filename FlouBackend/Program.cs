@@ -1,5 +1,8 @@
 using System.Text;
+using FlouBackend.Business.Interfaces.IRepositories;
+using FlouBackend.Business.Interfaces.IServices;
 using FlouBackend.Business.Interfaces.Services;
+using FlouBackend.Business.Repositories;
 using FlouBackend.Business.Services;
 using FlouBackend.Data.Context;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -55,6 +58,8 @@ builder.Services.AddAuthentication(options =>
 
 // ── Dependency Injection ──────────────────────────────────────────────────────
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IItemRepository, ItemRepository>();
+builder.Services.AddScoped<IItemService, ItemService>();
 
 // ── Swagger + Controllers ─────────────────────────────────────────────────────
 builder.Services.AddControllers();

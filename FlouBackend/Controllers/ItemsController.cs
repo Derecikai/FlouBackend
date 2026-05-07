@@ -43,4 +43,28 @@ public class ItemsController : ControllerBase
 
         return Ok(result);
     }
+
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> DeleteById(Guid id)
+    {
+        var deleted = await _itemService.DeleteAsync(id, GetUserId());
+
+        if (!deleted)
+            return NotFound();
+
+        return NoContent(); // 204 — success, nothing to return
+    }
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> UpdateItemById([FromBody] UpdateItemRequest request, Guid id)
+    {
+        var result = await _itemService.UpdateAsync(request, id, GetUserId());
+
+        if (result is null)
+        {
+            return NotFound();
+        }
+        return Ok(result);
+
+
+    }
 }

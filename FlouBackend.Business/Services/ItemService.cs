@@ -13,6 +13,7 @@ public class ItemService : IItemService
 
     public ItemService(IItemRepository repo) => _repo = repo;
 
+     //CREATE AN ITEM
     public async Task<ItemResponse> CreateAsync(CreateItemRequest request, string userId)
     {
         // Step 1 — convert the request DTO into an Item entity
@@ -24,8 +25,8 @@ public class ItemService : IItemService
         {
             item.UrlDetail = new UrlDetail
             {
-                Url          = request.Url,
-                Domain       = request.Domain,
+                Url = request.Url,
+                Domain = request.Domain,
                 ThumbnailUrl = request.ThumbnailUrl
             };
         }
@@ -46,6 +47,7 @@ public class ItemService : IItemService
         return saved!.ToResponse();
     }
 
+    // GET AN ITEM BY ID
     public async Task<ItemResponse?> GetByIdAsync(Guid id, string userId)
     {
         var item = await _repo.GetByIdAsync(id, userId);
@@ -56,5 +58,37 @@ public class ItemService : IItemService
     {
         var items = await _repo.GetAllForUserAsync(userId);
         return items.Select(i => i.ToResponse());
+    }
+    // DELETE AN ITEM(WE ARE SOFT DELETING)
+    public async Task<bool> DeleteAsync(Guid id, string userId)
+    {
+        // Step 1 — find the item (already checks it belongs to this user)
+        var item = await _repo.GetByIdAsync(id, userId);
+
+        // Step 2 — if not found, tell the caller it didn't exist
+        if (item is null) return false;
+
+        // Step 3 — soft delete: mark as deleted, don't remove the row
+        item.IsDeleted = true;
+        item.DeletedAt = DateTime.UtcNow;
+
+        // Step 4 — save the change to DB
+        await _repo.SaveChangesAsync();
+
+        return true;
+    }
+
+    // UPDATE AN ITEM
+    public async Task<ItemResponse?> UpdateAsync(UpdateItemRequest request, Guid id, string userId)
+    {
+        
+            var item = await _repo.GetByIdAsync(id, userId);   // tracked entity, with details loaded
+            if (item is null) return null;
+
+            request.ApplyTo(item);                              // mutate fields
+            await _repo.SaveChangesAsync();                     // EF emits UPDATE
+
+            return item.ToResponse();
+        
     }
 }

@@ -42,3 +42,7 @@ secrets.json
 # OS
 .DS_Store
 Thumbs.db
+
+# Claude session files
+SESSION_CONTEXT.md
+.claude/

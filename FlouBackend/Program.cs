@@ -60,6 +60,8 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IItemRepository, ItemRepository>();
 builder.Services.AddScoped<IItemService, ItemService>();
+builder.Services.AddScoped<IFolderRepository, FolderRepository>();
+builder.Services.AddScoped<IFolderService, FolderService>();
 
 // ── Swagger + Controllers ─────────────────────────────────────────────────────
 builder.Services.AddControllers();

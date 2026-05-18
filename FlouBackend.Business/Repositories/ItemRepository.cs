@@ -24,6 +24,16 @@ public class ItemRepository : IItemRepository
             .Include(i => i.CodeDetail)
             .FirstOrDefaultAsync(i => i.Id == id && i.UserId == userId && !i.IsDeleted);
 
+
+    public async Task<IEnumerable<Item>> GetRootItemsAsync(string userId) =>
+    await _context.Items
+        .Include(i => i.ItemType)
+        .Include(i => i.UrlDetail)
+        .Include(i => i.CodeDetail)
+        .Where(i => i.UserId == userId && i.FolderId == null && !i.IsDeleted)
+        .OrderByDescending(i => i.CreatedAt)
+        .ToListAsync();
+
     public async Task<IEnumerable<Item>> GetAllForUserAsync(string userId) =>
         await _context.Items
             .Include(i => i.ItemType)

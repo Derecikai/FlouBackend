@@ -44,6 +44,13 @@ public class ItemsController : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("root")]
+    public async Task<IActionResult> GetRootItems()
+    {
+        var items = await _itemService.GetRootItemsAsync(GetUserId());
+        return Ok(items);
+    }
+
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> DeleteById(Guid id)
     {

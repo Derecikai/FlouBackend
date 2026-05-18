@@ -54,6 +54,13 @@ public class ItemService : IItemService
         return item?.ToResponse();
     }
 
+    // GET ROOT ITEMS
+    public async Task<IEnumerable<ItemResponse>> GetRootItemsAsync(string userId)
+    {
+        var items = await _repo.GetRootItemsAsync(userId);
+        return items.Select(i => i.ToResponse());
+    }
+
     public async Task<IEnumerable<ItemResponse>> GetAllForUserAsync(string userId)
     {
         var items = await _repo.GetAllForUserAsync(userId);

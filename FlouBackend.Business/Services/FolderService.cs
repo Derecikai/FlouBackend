@@ -3,7 +3,6 @@ using FlouBackend.Business.DTOs.Responses.FolderResponses;
 using FlouBackend.Business.Interfaces.IRepositories;
 using FlouBackend.Business.Interfaces.IServices;
 using FlouBackend.Business.Mappings;
-using FlouBackend.Data.Entities;
 
 namespace FlouBackend.Business.Services;
 
@@ -96,16 +95,22 @@ public class FolderService : IFolderService
             if (request.ParentFolderId is not null)
             {
                 // Self-parent guard
-                if (request.ParentFolderId == id) return null;
+                if (request.ParentFolderId.Value == id) return null;
 
                 // Parent must exist and belong to this user
                 var parent = await _repo.GetByIdAsync(request.ParentFolderId.Value, userId);
                 if (parent is null) return null;
-
-                // Cycle check — new parent can't be a descendant of this folder
-                // (to be implemented with GetSubtreeAsync in step 4)
-
-                // Depth cap — same logic as CreateAsync
+                // Cycle check — walk up from proposed parent
+                var check = parent;
+                var depth = 1;
+                while (check.ParentFolderId is not null)
+                {
+                    if (check.ParentFolderId == id) return null;  // cycle detected
+                    if (depth >= MaxFolderDepth) return null;     // too deep
+                    check = await _repo.GetByIdAsync(check.ParentFolderId.Value, userId);
+                    if (check is null) break;
+                    depth++;
+                }
             }
         }
 
@@ -116,6 +121,44 @@ public class FolderService : IFolderService
 
     }
 
-    public Task<bool> DeleteAsync(Guid id, string userId) =>
-        throw new NotImplementedException();
+    // DELETE A FOLDER (cascade soft-delete)
+    public async Task<bool> DeleteAsync(Guid id, string userId)
+    {
+        // Step 1 — verify folder exists and belongs to this user
+        var folder = await _repo.GetByIdAsync(id, userId);
+        if (folder is null) return false;
+
+        // Step 2 — get the entire subtree of descendant folders
+        var descendants = await _repo.GetSubtreeFoldersAsync(id, userId);
+
+        // Step 3 — collect ALL folder IDs (root + every descendant)
+        var allFolderIds = descendants.Select(f => f.Id).ToList();
+        allFolderIds.Add(id); // don't forget the root folder itself
+
+        // Step 4 — get all items living in any of these folders
+        var items = await _repo.GetItemsByFolderIdsAsync(allFolderIds, userId);
+
+        // Step 5 — soft-delete everything
+        var now = DateTime.UtcNow;
+
+        foreach (var descendant in descendants)
+        {
+            descendant.IsDeleted = true;
+            descendant.DeletedAt = now;
+        }
+
+        foreach (var item in items)
+        {
+            item.IsDeleted = true;
+            item.DeletedAt = now;
+        }
+
+        folder.IsDeleted = true;
+        folder.DeletedAt = now;
+
+        // Step 6 — one SaveChanges persists everything at once
+        await _repo.SaveChangesAsync();
+        return true;
+    }
+
 }

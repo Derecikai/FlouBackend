@@ -42,5 +42,33 @@ public class FolderRepository : IFolderRepository
             .OrderByDescending(i => i.CreatedAt)
             .ToListAsync();
 
+    public async Task<IEnumerable<Item>> GetItemsByFolderIdsAsync(IEnumerable<Guid> folderIds, string userId) =>
+    await _context.Items
+        .Where(i => i.UserId == userId && i.FolderId != null
+               && folderIds.Contains(i.FolderId.Value) && !i.IsDeleted)
+        .ToListAsync();
+
+    public async Task<IEnumerable<Folder>> GetSubtreeFoldersAsync(Guid rootId, string userId)
+    {
+        var allDescendants = new List<Folder>();
+        var toProcess = new Queue<Guid>();
+        toProcess.Enqueue(rootId);
+
+        while (toProcess.Count > 0)
+        {
+            var currentId = toProcess.Dequeue();
+            var children = await _context.Folders
+                .Where(f => f.ParentFolderId == currentId && f.UserId == userId && !f.IsDeleted)
+                .ToListAsync();
+
+            foreach (var child in children)
+            {
+                allDescendants.Add(child);
+                toProcess.Enqueue(child.Id); // queue its children for next iteration
+            }
+        }
+
+        return allDescendants;
+    }
     public async Task SaveChangesAsync() => await _context.SaveChangesAsync();
 }

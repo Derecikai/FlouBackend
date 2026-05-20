@@ -9,5 +9,7 @@ public interface IFolderRepository
     Task<IEnumerable<Folder>> GetRootFoldersAsync(string userId);
     Task<IEnumerable<Folder>> GetChildFoldersAsync(Guid parentId, string userId);
     Task<IEnumerable<Item>> GetItemsInFolderAsync(Guid folderId, string userId);
+    Task<IEnumerable<Item>> GetItemsByFolderIdsAsync(IEnumerable<Guid> folderIds, string userId);
+    Task<IEnumerable<Folder>> GetSubtreeFoldersAsync(Guid rootId, string userId);
     Task SaveChangesAsync();
 }

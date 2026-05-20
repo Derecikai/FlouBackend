@@ -54,7 +54,7 @@ public class FoldersController : ControllerBase
 
     public async Task<IActionResult> UpdateFolderById([FromBody] UpdateFolderRequest folder, Guid id)
     {
-        var result = await _folderService.UpdateAsync(folder,id,GetUserId());
+        var result = await _folderService.UpdateAsync(folder, id, GetUserId());
         if (result is null)
         {
             return NotFound();
@@ -62,5 +62,17 @@ public class FoldersController : ControllerBase
 
         return Ok(result);
 
+    }
+
+    // DELETE /api/folders/{id}
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> DeleteFolder(Guid id)
+    {
+        var deleted = await _folderService.DeleteAsync(id, GetUserId());
+
+        if (!deleted)
+            return NotFound();
+
+        return NoContent(); // 204 — success, nothing to return
     }
 }
